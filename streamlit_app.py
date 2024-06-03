@@ -150,7 +150,7 @@ if uploaded_file or example_data:
     col[3].metric(label="No. of Test samples", value=X_test.shape[0], delta="")
     
     with st.expander('Initial dataset', expanded=True):
-        st.dataframe(df, height=210, use_container_width=True)
+        st.dataframe(pdf, height=210, use_container_width=True)
     with st.expander('Train split', expanded=False):
         train_col = st.columns((3,1))
         with train_col[0]:
