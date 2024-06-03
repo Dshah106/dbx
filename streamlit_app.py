@@ -7,6 +7,8 @@ from sklearn.metrics import mean_squared_error, r2_score
 import altair as alt
 import time
 import zipfile
+import requests
+import json
 
 # Page title
 st.set_page_config(page_title='ML Model Building', page_icon='🤖')
@@ -59,7 +61,61 @@ with st.sidebar:
     st.markdown('**1.2. Use example data**')
     example_data = st.toggle('Load example data')
     if example_data:
-        df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/delaney_solubility_with_descriptors.csv')
+        # df = pd.read_csv('https://raw.githubusercontent.com/dataprofessor/data/master/delaney_solubility_with_descriptors.csv')
+
+        def submit_run():
+            url = f"https://{DATABRICKS_INSTANCE}/api/2.0/jobs/runs/submit"
+            headers = {"Authorization": f"Bearer {TOKEN}"}
+            payload = {
+                "run_name": "SQL execution",
+                "existing_cluster_id": CLUSTER_ID,
+                "notebook_task": {
+                    "notebook_path": NOTEBOOK_PATH
+                }
+            }
+            response = requests.post(url, headers=headers, data=json.dumps(payload))
+            return response.json()
+
+        def get_run_status(run_id):
+            url = f"https://{DATABRICKS_INSTANCE}/api/2.0/jobs/runs/get?run_id={run_id}"
+            headers = {"Authorization": f"Bearer {TOKEN}"}
+            response = requests.get(url, headers=headers)
+            return response.json()
+
+        def fetch_result(run_id):
+            status = get_run_status(run_id)
+            while status['state']['life_cycle_state'] not in ['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']:
+                time.sleep(5)
+                status = get_run_status(run_id)
+            if status['state']['result_state'] == 'SUCCESS':
+                return status['run_page_url']
+            else:
+                raise Exception(f"Run failed with state: {status['state']['result_state']}")
+
+        def fetch_notebook_output(run_id):
+            url = f"https://{DATABRICKS_INSTANCE}/api/2.0/jobs/runs/get-output?run_id={run_id}"
+            headers = {"Authorization": f"Bearer {TOKEN}"}
+            response = requests.get(url, headers=headers)
+            return response.json()
+
+
+
+        if __name__ == "__main__":
+            run_response = submit_run()
+            run_id = run_response['run_id']
+            result_url = fetch_result(run_id)
+            print(f"Run completed. View results at: {result_url}")
+
+            result = fetch_notebook_output(run_id)
+            print(f"Notebook execution completed. Output: {result}")
+            print(result['notebook_output']['result'])
+            data = result['notebook_output']['result']
+            print(type(data))
+            data = data.replace("'", '"')
+            d = json.loads(data)
+            df = pd.DataFrame(d)
+
+
 
     st.header('2. Set Parameters')
     parameter_split_size = st.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
