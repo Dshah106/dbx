@@ -120,11 +120,11 @@ with st.sidebar:
             data = data.replace("'", '"')
             d = json.loads(data)
             df = pd.DataFrame(d)
+            st.dataframe(pdf, height=210, use_container_width=True)
 
 
-
-    st.header('2. Set Parameters')
-    parameter_split_size = st.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
+    # st.header('2. Set Parameters')
+    # parameter_split_size = st.slider('Data split ratio (% for Training Set)', 10, 90, 80, 5)
 
     st.subheader('2.1. Learning Parameters')
     with st.expander('See parameters'):
