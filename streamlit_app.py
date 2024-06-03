@@ -120,7 +120,7 @@ with st.sidebar:
             data = data.replace("'", '"')
             d = json.loads(data)
             df = pd.DataFrame(d)
-            st.dataframe(pdf, height=210, use_container_width=True)
+            st.dataframe(df, height=210, use_container_width=True)
 
 
     # st.header('2. Set Parameters')
