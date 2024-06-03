@@ -10,6 +10,12 @@ import zipfile
 import requests
 import json
 
+DATABRICKS_INSTANCE = st.secrets['DATABRICKS_INSTANCE']
+TOKEN = st.secrets['TOKEN']
+CLUSTER_ID = st.secrets['CLUSTER_ID']
+NOTEBOOK_PATH = st.secrets['NOTEBOOK_PATH']
+
+
 # Page title
 st.set_page_config(page_title='ML Model Building', page_icon='🤖')
 st.title('🤖 ML Model Building')
